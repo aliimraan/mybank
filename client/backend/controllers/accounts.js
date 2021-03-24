@@ -1,88 +1,78 @@
-const accountsModel=require('../models/accounts')
-const usersModel=require('../models/users')
+const {oneCustomer}=require('../models/users')
+const {deposite,lastDeposite,widthdrawl}=require('../models/accounts')
 const bcrypt=require('bcrypt')
 
 exports.depositeAmount=(req,res)=>{
-    const userId=req.user.id
+    const userId=req.params.id
     const {depositeAmount,pass}=req.body.allInputs
-    accountsModel.findOne({customerId:userId}).then(data=>{
-        console.log(data)
-        if(!data){
+    oneCustomer(userId).then(record=>{
+        if(record.length<=0){
             return res.status(401).json({msg:'Not valid user'})
         }
-        usersModel.find({_id:userId}).then(record=>{
-            bcrypt.compare(pass,record[0].password).then(result=>{
-                if(!result){
-                    return res.status(400).json({msg:"Wrong password"})
-                }
-                   let initialAmount=data.totalAmount
-                   const newAmount=(initialAmount+parseInt(depositeAmount))
-                   accountsModel.findOneAndUpdate({customerId:userId,
-                    "$push":{
-                        transactions:[{
-                            type:"deposite",
-                            amount:depositeAmount,
-                        }],
-                    },
-                    totalAmount:newAmount
-                }).then(added=>{
-                    return res.status(200).json({msg:'amount deposited'})
+        bcrypt.compare(pass,record[0].password).then(result=>{
+            if(!result){
+                return res.status(400).json({msg:"Wrong password"})
+                }  
+            lastDeposite(userId).then(data=>{
+                if(data.length<=0){
+                    deposite(depositeAmount,userId,depositeAmount).then(data=>{
+                        if(data){
+                            return res.status(200).json({msg:"Amaount deposited"})
+                        }
+                    }).catch(err=>{
+                        return res.status(400).json({msg:"Transaction failed,please try again later"})
+                    })
+                }else{
+                    const total=data[0].totalAmount+parseInt(depositeAmount)
+                deposite(depositeAmount,userId,total).then(data=>{
+                    if(data){
+                        return res.status(200).json({msg:"amount deposited"})
+                    }
                 }).catch(err=>{
-                    return res.status(400).json({msg:'failed ,try again later'})
+                    return res.status(400).json({msg:"not deposited"})
                 })
-               
+                }
+                
             }).catch(err=>console.log(err))
+                
         }).catch(err=>{
             console.log(err)
         })
-    }).catch(err=>{
-        return res.status(500).json({err})
     })
 }
 exports.widthdrawAmount=(req,res)=>{
-    const userId=req.user.id
+    const userId=req.params.id
     const {widthdrawAmount,pass}=req.body.allInputs
-    accountsModel.findOne({customerId:userId}).then(data=>{
-        console.log(data)
-        if(!data){
+    oneCustomer(userId).then(record=>{
+        if(record.length<=0){
             return res.status(401).json({msg:'Not valid user'})
         }
-        usersModel.find({_id:userId}).then(record=>{
-            bcrypt.compare(pass,record[0].password).then(result=>{
-                if(!result){
-                    return res.status(400).json({msg:"Wrong password"})
+        bcrypt.compare(pass,record[0].password).then(result=>{
+            if(!result){
+                return res.status(400).json({msg:"Wrong password"})
+                }  
+            lastDeposite(userId).then(data=>{
+                if(data.length<=0){
+                    return res.status(400).json({msg:"deposite money to widthdrawl"})
+                }else{
+                    if(data[0].totalAmount<parseInt(widthdrawAmount)){
+                        return res.status(400).json({msg:"No sufficient Fund"})
+                    }else{
+                        const total=data[0].totalAmount-parseInt(widthdrawAmount)
+                        widthdrawl(widthdrawAmount,userId,total).then(data=>{
+                    if(data){
+                        return res.status(200).json({msg:"Amount widthdrawl"})
+                    }
+                }).catch(err=>{
+                    return res.status(400).json({msg:"something went wrong"})
+                })
+                    }
+                    
                 }
-                   let initialAmount=data.totalAmount
-                   if(initialAmount<widthdrawAmount){
-                       return res.status(400).json({msg:"Not Sufficient Fund"})
-                   }else{
-                    const newAmount=(initialAmount-parseInt(widthdrawAmount))
-                    accountsModel.findOneAndUpdate({customerId:userId,
-                     "$push":{
-                         transactions:[{
-                             type:"widthdraw",
-                             amount:widthdrawAmount,
-                         }],
-                     },
-                     totalAmount:newAmount
-                 }).then(added=>{
-                     return res.status(200).json({msg:'Amount Widthdrawl Successfully'})
-                 }).catch(err=>{
-                     return res.status(400).json({msg:'failed ,try again later'})
-                 })
-                   }
             }).catch(err=>console.log(err))
+                
         }).catch(err=>{
             console.log(err)
         })
-    }).catch(err=>{
-        return res.status(500).json({err})
-    })
-}
-exports.totalAmount=(req,res)=>{
-    accountsModel.find().then(data=>{
-        return res.status(200).json({data})
-    }).catch(err=>{
-        return res.status(400).json({err})
     })
 }

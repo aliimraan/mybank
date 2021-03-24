@@ -19,8 +19,6 @@ function Banker() {
         axios.get('http://localhost:5000/api/users/allUsers',config).then(data=>{
             setRecord([data.data])
         }).catch(err=>console.log(err))
-
-       
         axios.get('http://localhost:5000/account/totalAmount',config).then(data=>{
            data.data.data.find((item,index)=>{
                console.log(item.totalAmount)

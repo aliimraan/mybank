@@ -27,7 +27,6 @@ function Account({heading,button,submit,data,redirect,src}) {
     const submitHandler=(e)=>{
         e.preventDefault()
         const data={allInputs}
-        console.log(data.allInputs)
         if(e.target.length>3){
             return axios.post('http://localhost:5000/api/users/register',data).then(data=>{
                 if(data.status===200){
@@ -47,7 +46,8 @@ function Account({heading,button,submit,data,redirect,src}) {
             const config={
                 headers:{jwt_react:token}
             }
-            return axios.post('http://localhost:5000/account/deposite',data,config).then(data=>{
+            const id=localStorage.getItem('id')
+            return axios.post(`http://localhost:5000/account/deposite/${id}`,data,config).then(data=>{
                 if(data.status===200){
                     toast.success(data.data.msg)
                     setTimeout(() => {
@@ -65,7 +65,8 @@ function Account({heading,button,submit,data,redirect,src}) {
             const config={
                 headers:{jwt_react:token}
             }
-            return axios.post('http://localhost:5000/account/widthdraw',data,config).then(data=>{
+            const id=localStorage.getItem('id')
+            return axios.post(`http://localhost:5000/account/widthdraw/${id}`,data,config).then(data=>{
                 if(data.status===200){
                     toast.success(data.data.msg)
                     setTimeout(() => {
@@ -83,15 +84,14 @@ function Account({heading,button,submit,data,redirect,src}) {
         else{
             return axios.post('http://localhost:5000/api/users/login',data).then(data=>{
                 const token=data.data.token
-                console.log(data.data)
                 localStorage.setItem('token',token)
-                localStorage.setItem('name',data.data.data.firstName)
-                localStorage.setItem('id',data.data.data._id)
+                localStorage.setItem('name',data.data.data[0].firstName)
+                localStorage.setItem('id',data.data.data[0].id)
                 if(data.status===200){
                     if(data.status===200){
                         toast.success(data.data.msg)
                             setTimeout(() => {
-                                data.data.data.role==='user'?history.push('/'):history.push('/banker')
+                                data.data.data[0].role==='user'?history.push('/'):history.push('/banker')
                             }, 5000);
                     }
                 }

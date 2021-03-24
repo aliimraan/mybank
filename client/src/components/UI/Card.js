@@ -2,6 +2,7 @@ import React from 'react'
 import {Jumbotron,Container} from 'react-bootstrap'
 
 function Card({title,amount}) {
+  
     return (
         <div>
         <Jumbotron fluid style={{background:'#161616',color:'#fb2b76'}}>

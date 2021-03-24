@@ -1,15 +1,21 @@
-const mongoose=require('mongoose')
+const db=require('../db/knex')
 
-const usersScheme=new mongoose.Schema({
-    firstName:{type:String,trim:true},
-    lastName:{type:String,trim:true},
-    mobileNumber:{type:String},
-    email:{type:String},
-    password:{type:String},
-    cardNo:{type:String,trim:true},
-    dob:{type:String},
-    role:{type:String,default:'user'},
-},{timestamps:true})
-
-const usersModel=mongoose.model('users',usersScheme)
-module.exports=usersModel
+exports.insertUser=async(data)=>{
+    const result= await db('users').insert(data)
+    return result
+}
+exports.checkUser=async(email)=>{
+    const result= await db('users').where({
+        email: email
+ })
+    return result
+}
+exports.oneCustomer=async(id)=>{
+    const result= await db('users').where({
+        id: id
+      })
+    return result
+}
+exports.findUser=async()=>{
+    return await db('users').where('role','user')
+}

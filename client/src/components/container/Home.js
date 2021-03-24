@@ -8,16 +8,18 @@ import axios from 'axios'
 
 function Home() {
     const [record,setRecord]= useState([])
+    const [amount,setAmount]= useState([])
     useEffect(()=>{
         const id=localStorage.getItem('id')
-        console.log(id)
         const token=localStorage.getItem('token')
         const config={
             headers:{jwt_react:token}
         }
         axios.get(`http://localhost:5000/api/users/one/user/${id}`,config).then(data=>{
-            console.log(data.data)
             setRecord([data.data])
+        }).catch(err=>console.log(err))
+        axios.get(`http://localhost:5000/api/users/totalAmount/user/${id}`,config).then(data=>{
+            setAmount(data.data)
         }).catch(err=>console.log(err))
     },[])
     const name=localStorage.getItem('name')
@@ -36,7 +38,7 @@ function Home() {
                     <h1 className="text-capitalize">welcome back , {name}</h1>
                 </div>
                <Container>
-                    <Card title={"current balance"} amount={record===[] || record[0]===undefined?'':record[0].totalAmount}/>
+                    <Card title={"current balance"} amount={amount[0]===[] || amount[0]===undefined?'':amount[0].totalAmount}/>
                     <TableLists data={transactionList} record={record[0]}/>
                </Container>
             </Dashboard> 

@@ -20,17 +20,19 @@ function TableLists({data,record}) {
     }
 
     const showData=(el)=>{
+      console.log(el)
         if(el===[]||el===undefined){
             return 'loading'
         }
-        if(el.transactions){
-          return el.transactions.map((item,index)=>{
+        console.log(el[0].hasOwnProperty('amount'))
+        if(el[0].hasOwnProperty('amount')){
+          return el.map((item,index)=>{
             return (
               <tr key={index} style={{textTransform:'capitalize'}}>
                 <td>{++index}</td>
                 <td>{item.type}</td>
                 <td>{item.amount}</td>
-                <td>{(item.time).slice(0, 10)}</td>
+                <td>{(item.true).slice(0, 10)}</td>
                 <td style={{color:'green',fontWeight:'800'}}>success</td>
               </tr>
             )  
@@ -38,7 +40,7 @@ function TableLists({data,record}) {
         }else{
           return el[0]===undefined?'':el[0].map((item,index)=>{
             return (
-              <tr key={index} style={{textTransform:'capitalize'}} onClick={()=>userHandler(item._id)}>
+              <tr key={index} style={{textTransform:'capitalize'}} onClick={()=>userHandler(item.id)}>
                 <td>{++index}</td>
                 <td>{item.firstName}</td>
                 <td>{item.cardNo}</td>

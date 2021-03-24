@@ -1,14 +1,30 @@
-const mongoose=require('mongoose')
+const db=require('../db/knex')
 
-const accountsScheme=new mongoose.Schema({
-    customerId:{type:mongoose.Types.ObjectId,ref:'users'},
-    transactions:[{
-        type:{type:String},
-        amount:{type:Number},
-        time:{type:Date,default:Date.now}
-    }],
-    totalAmount:{type:Number,default:0}
-},{timestamps:true})
-
-const accountsModel=mongoose.model('accounts',accountsScheme)
-module.exports=accountsModel
+exports.bycardNo=async(number)=>{
+    const result= await db('accounts').where({
+        c_cardNo:number
+    })
+    return result
+}
+exports.deposite=async(amount,userId,total)=>{
+    return await db('accounts').insert({
+        amount:amount,
+        type:'deposite',
+        c_id:userId,
+        totalAmount:total
+    })
+}
+exports.widthdrawl=async(amount,userId,total)=>{
+    return await db('accounts').insert({
+        amount:amount,
+        type:'widthdraw',
+        c_id:userId,
+        totalAmount:total
+    })
+}
+exports.personalTrans=async(c_id)=>{
+    return await db('accounts').where('c_id',c_id)
+}
+exports.lastDeposite=async(userId)=>{
+    return await db('accounts').where('c_id',userId).orderBy('id','DESC').limit(1)
+}
